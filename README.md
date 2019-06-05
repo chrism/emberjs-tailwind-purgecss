@@ -10,7 +10,88 @@ Additionally, [PurgeCSS](https://www.purgecss.com/)—which is designed to remov
 
 For these reasons it may be useful to include Tailwind and PurgeCSS without the use of an addon.
 
-This repo provides a working example and guide to adding it to a project.
+This repo provides a working example and guide to adding it to a project, each step as a commit.
+
+## Very quick start
+
+I've written up in depth below each step of the process but if you just want to quickly get it running here is a very short guide to get you started.
+
+### New project
+
+```
+ember new your-project --yarn
+```
+
+### Install PostCSS and plugins
+
+```
+yarn add ember-cli-postcss tailwindcss postcss-import @fullhuman/postcss-purgecss -D
+```
+
+### Generate Tailwind configuration file
+
+```
+npx tailwind init config/tailwind.js --full
+```
+
+Note: [you probably don't want to add `--full`](https://tailwindcss.com/docs/configuration#creating-your-configuration-file) in a real project.
+
+### Update build pipeline to include plugins
+
+```js
+// ember-cli-build.js
+'use strict';
+
+const EmberApp = require('ember-cli/lib/broccoli/ember-app');
+const isProduction = EmberApp.env() === 'production';
+
+const purgeCSS = {
+  module: require('@fullhuman/postcss-purgecss'),
+  options: {
+    content: [
+      // add extra paths here for components/controllers which include tailwind classes
+      './app/index.html',
+      './app/templates/**/*.hbs'
+    ],
+    defaultExtractor: content => content.match(/[A-Za-z0-9-_:/]+/g) || []
+  }
+}
+
+module.exports = function(defaults) {
+  let app = new EmberApp(defaults, {
+    postcssOptions: {
+      compile: {
+        plugins: [
+          require('postcss-import'),
+          require('tailwindcss')('./config/tailwind.js'),
+          ...isProduction ? [purgeCSS] : []
+        ]
+      }
+    }
+  });
+  return app.toTree();
+};
+```
+
+### Create new CSS files and import Tailwind
+
+Create `app/styles/components.css` and `app/styles/utilities.css` then update `app.css`
+
+```
+@import "tailwindcss/base";
+
+@import "tailwindcss/components";
+@import "components.css";
+
+@import "tailwindcss/utilities";
+@import "utilities.css";
+```
+
+Now you can start to add Tailwind classes to your project, add additional configuration including custom components and utilities.
+
+A detailed explanation of each step and why continues below
+
+----
 
 ## Creating a new Ember project
 
@@ -93,8 +174,6 @@ After updating `templates/application.hbs` to include some Tailwind classes it s
 {{outlet}}
 ```
 
-You can see this basic working example in this commit.
-
 ## Customizing Tailwind
 
 This approach works, but is the most basic way of including Tailwind. Usually you'll want to customize the configuration to suit your project.
@@ -142,8 +221,6 @@ module.exports = function(defaults) {
 ```
 
 Now adding a custom color to the configuration and including it in template will work as expected.
-
-This is a commit showing this working.
 
 ## Adding components and utilities
 
@@ -205,8 +282,6 @@ This approach of switching from `@tailwind` directives to `@import` for `postcss
 ```
 
 Making these changes now means that utilities and components can be easily added and used in your application.
-
-This commit shows a working example of a custom utility and component being used.
 
 ## Purging unused CSS
 
@@ -313,3 +388,5 @@ In [Ed Faulkner's example he included `join` for the paths](https://discuss.embe
 > my guess is that they’re relative to the current working directory. So they will work as long as people type ember at the project root. But won’t work if you happen to invoke the ember command from a subdirectory of your project.
 
 So you may want to update the paths to use `join` instead if that is an issue for you.
+
+If you have an questions or issues with this please feel free to raise an issue on this project, I'd love to hear your experiences.
