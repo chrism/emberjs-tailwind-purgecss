@@ -1,4 +1,4 @@
-#Ember.js, Tailwind 1.0 and PurgeCSS working example
+# Ember.js, Tailwind 1.0 and PurgeCSS working example
 
 ## Background
 
@@ -212,10 +212,104 @@ This commit shows a working example of a custom utility and component being used
 
 Now that Tailwind is set up and working correctly the final step is to remove all the unused CSS selectors from the outputted CSS to reduce unnecessary filesize.
 
-To do this there is another library [PurgeCSS](https://www.purgecss.com/) which we can use.
+If you checked your `project.css` file you would see lots of unused CSS selectors, we want to automate the process of removing them from the outputted CSS.
+
+To do this we can use another library called [PurgeCSS](https://www.purgecss.com/).
 
 ### Installing PurgeCSS
 
 ```
-yarn add purgecss -D
+yarn add @fullhuman/postcss-purgecss -D
 ```
+
+### Basic configuration
+Then update `ember-cli-build.js` to include it in the build pipeline.
+
+```js
+'use strict';
+
+const EmberApp = require('ember-cli/lib/broccoli/ember-app');
+
+module.exports = function(defaults) {
+  let app = new EmberApp(defaults, {
+    postcssOptions: {
+      compile: {
+        plugins: [
+          require('postcss-import'),
+          require('tailwindcss')('./config/tailwind.js'),
+          {
+            module: require('@fullhuman/postcss-purgecss'),
+            options: {
+              content: [
+                // add extra paths here for components/controllers which include tailwind classes
+                './app/index.html',
+                './app/templates/**/*.hbs'
+              ]
+            }
+          }
+        ]
+      }
+    }
+  });
+  return app.toTree();
+};
+```
+
+This should now only include selectors if they have been found in the `app/index.html` or template files.
+
+Extra paths should be added if you have included selectors in components files or elsewhere in your project.
+
+### Improved configuration
+
+Although this does work it there are two main issues
+- it slows down the development cycle (rebuilding CSS with only included classes every time)
+- it misses some Tailwind specific characters, like `:` in it's string matching.
+
+We can fix this by adding an extractor and conditionally including PurgeCSS in production only.
+
+The [Tailwind guides on controlling file size](https://tailwindcss.com/docs/controlling-file-size) help with this configuration.
+
+```js
+// ember-cli-build.js
+'use strict';
+
+const EmberApp = require('ember-cli/lib/broccoli/ember-app');
+const isProduction = EmberApp.env() === 'production';
+
+const purgeCSS = {
+  module: require('@fullhuman/postcss-purgecss'),
+  options: {
+    content: [
+      // add extra paths here for components/controllers which include tailwind classes
+      './app/index.html',
+      './app/templates/**/*.hbs'
+    ],
+    defaultExtractor: content => content.match(/[A-Za-z0-9-_:/]+/g) || []
+  }
+}
+
+module.exports = function(defaults) {
+  let app = new EmberApp(defaults, {
+    postcssOptions: {
+      compile: {
+        plugins: [
+          require('postcss-import'),
+          require('tailwindcss')('./config/tailwind.js'),
+          ...isProduction ? [purgeCSS] : []
+        ]
+      }
+    }
+  });
+  return app.toTree();
+};
+```
+
+This final configuration now should match all standard Tailwind selectors and only run purgeCSS when building for production.
+
+## What else?
+
+In [Ed Faulkner's example he included `join` for the paths](https://discuss.emberjs.com/t/postcss-import-problem-with-tailwindcss-v1-0/16595/10).
+
+> my guess is that they’re relative to the current working directory. So they will work as long as people type ember at the project root. But won’t work if you happen to invoke the ember command from a subdirectory of your project.
+
+So you may want to update the paths to use `join` instead if that is an issue for you.
