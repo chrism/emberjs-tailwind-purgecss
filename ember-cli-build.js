@@ -8,7 +8,17 @@ module.exports = function(defaults) {
       compile: {
         plugins: [
           require('postcss-import'),
-          require('tailwindcss')('./config/tailwind.js')
+          require('tailwindcss')('./config/tailwind.js'),
+          {
+            module: require('@fullhuman/postcss-purgecss'),
+            options: {
+              content: [
+                // add extra paths here for components/controllers which include tailwind classes
+                './app/index.html',
+                './app/templates/**/*.hbs'
+              ]
+            }
+          }
         ]
       }
     }
