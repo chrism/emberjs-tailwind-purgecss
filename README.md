@@ -94,3 +94,128 @@ After updating `templates/application.hbs` to include some Tailwind classes it s
 ```
 
 You can see this basic working example in this commit.
+
+## Customizing Tailwind
+
+This approach works, but is the most basic way of including Tailwind. Usually you'll want to customize the configuration to suit your project.
+
+This is explained in detail in the [Tailwind Configuration guide](https://tailwindcss.com/docs/configuration).
+
+### Generate configuration file
+
+The first step is to generate a configuration file.
+
+For Ember, it makes sense to include this file in the `/config` directory and in this example we are going to include the full configuration (in reality, [you should start as minimal as possible](https://tailwindcss.com/docs/configuration#creating-your-configuration-file) but this is useful for this example).
+
+```
+npx tailwind init config/tailwind.js --full
+```
+
+Which should result in something like this
+
+```
+✅ Created Tailwind config file: config/tailwind.js
+```
+
+### Updating path to configuration in build pipeline
+
+As per the [configuration guides](https://tailwindcss.com/docs/configuration#using-a-different-file-name) update the plugin to include this new path.
+
+```js
+// ember-cli-build.js
+'use strict';
+
+const EmberApp = require('ember-cli/lib/broccoli/ember-app');
+
+module.exports = function(defaults) {
+  let app = new EmberApp(defaults, {
+    postcssOptions: {
+      compile: {
+        plugins: [
+          require('tailwindcss')('./config/tailwind.js')
+        ]
+      }
+    }
+  });
+  return app.toTree();
+};
+```
+
+Now adding a custom color to the configuration and including it in template will work as expected.
+
+This is a commit showing this working.
+
+## Adding components and utilities
+
+The addon `ember-cli-tailwind` allows for the easy creation of Tailwind [utilities](https://tailwindcss.com/docs/adding-new-utilities) and [components](https://tailwindcss.com/docs/extracting-components).
+
+Both of which are integral to working with Tailwind.
+
+While with our current solution it is possible to add them directly to the `app.css` file pretty easily (int he right place) splitting them up into separate files would make a cleaner and more modular approach like `ember-cli-tailwind` does.
+
+### Installing PostCSS
+
+To do that we need to now include `postcss-import` which is a plugin to inline `@import` rules content.
+
+```
+yarn add postcss-import -D
+```
+
+### Updating configuration
+
+After installing we need to update the `app.css` and `ember-cli-build.js` to reflect this change.
+
+```js
+// ember-cli-build.js
+'use strict';
+
+const EmberApp = require('ember-cli/lib/broccoli/ember-app');
+
+module.exports = function(defaults) {
+  let app = new EmberApp(defaults, {
+    postcssOptions: {
+      compile: {
+        plugins: [
+          require('postcss-import'),
+          require('tailwindcss')('./config/tailwind.js')
+        ]
+      }
+    }
+  });
+  return app.toTree();
+};
+```
+
+It may be worth pointing out that although this worked for me [there has been discussion](https://github.com/jeffjewiss/ember-cli-postcss/issues/371#issuecomment-464084011) about also the need to include the `node_modules` path in the configuration.
+
+### Updating CSS importing
+
+For the `app.css` file some changes are needed to the way the tailwind files are imported and after creating two new files `components.css` and `utilities.css` they can be imported (in the right order) too.
+
+This approach of switching from `@tailwind` directives to `@import` for `postcss-import` is explained in the [Tailwind documentation on using CSS](https://tailwindcss.com/docs/adding-new-utilities#using-css).
+
+```
+@import "tailwindcss/base";
+
+@import "tailwindcss/components";
+@import "components.css";
+
+@import "tailwindcss/utilities";
+@import "utilities.css";
+```
+
+Making these changes now means that utilities and components can be easily added and used in your application.
+
+This commit shows a working example of a custom utility and component being used.
+
+## Purging unused CSS
+
+Now that Tailwind is set up and working correctly the final step is to remove all the unused CSS selectors from the outputted CSS to reduce unnecessary filesize.
+
+To do this there is another library [PurgeCSS](https://www.purgecss.com/) which we can use.
+
+### Installing PurgeCSS
+
+```
+yarn add purgecss -D
+```
