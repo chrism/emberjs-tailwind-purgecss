@@ -1,58 +1,96 @@
-# emberjs-tailwind-purgecss
+#Ember.js, Tailwind 1.0 and PurgeCSS working example
 
-This README outlines the details of collaborating on this Ember application.
-A short introduction of this app could easily go here.
+## Background
 
-## Prerequisites
+An excellent Ember addon `ember-cli-tailwind` already exists which wraps Tailwind CSS and provides easy integration in an Ember application.
 
-You will need the following things properly installed on your computer.
+However, although Tailwind itself has [recently released v1.0 with some key differences and updates](https://tailwindcss.com/docs/upgrading-to-v1) the addon currently includes a specific pre v1.0 version of Tailwind.
 
-* [Git](https://git-scm.com/)
-* [Node.js](https://nodejs.org/)
-* [Yarn](https://yarnpkg.com/)
-* [Ember CLI](https://ember-cli.com/)
-* [Google Chrome](https://google.com/chrome/)
+Additionally, [PurgeCSS](https://www.purgecss.com/)—which is designed to remove unused CSS automatically and very useful considering the Tailwind approach to CSS—is not straightforward to implement when using the addon.
 
-## Installation
+For these reasons it may be useful to include Tailwind and PurgeCSS without the use of an addon.
 
-* `git clone <repository-url>` this repository
-* `cd emberjs-tailwind-purgecss`
-* `yarn install`
+This repo provides a working example and guide to adding it to a project.
 
-## Running / Development
+## Creating a new Ember project
 
-* `ember serve`
-* Visit your app at [http://localhost:4200](http://localhost:4200).
-* Visit your tests at [http://localhost:4200/tests](http://localhost:4200/tests).
+Assuming you already have `yarn` and `ember-cli` installed.
 
-### Code Generators
+```
+ember new emberjs-tailwind-purgecss --yarn
+```
 
-Make use of the many generators for code, try `ember help generate` for more details
+## Installing PostCSS
 
-### Running Tests
+In the [Tailwind installation guide](https://tailwindcss.com/docs/installation#using-tailwind-with-postcss) it explains
 
-* `ember test`
-* `ember test --server`
+> For most projects, you'll want to add Tailwind as a PostCSS plugin in your build chain.
 
-### Linting
+Luckily, a [PostCSS](https://postcss.org/) addon already exists for Ember, [Ember CLI Postcss](https://jeffjewiss.github.io/ember-cli-postcss/)
 
-* `yarn lint:hbs`
-* `yarn lint:js`
-* `yarn lint:js --fix`
+It can be installed with
 
-### Building
+```
+ember install ember-cli-postcss
+```
 
-* `ember build` (development)
-* `ember build --environment production` (production)
+On it's own this doesn't do much but allows PostCSS plugins to be included in the build pipeline.
 
-### Deploying
+## Installing Tailwind
 
-Specify what it takes to deploy your app.
+### Installing package
 
-## Further Reading / Useful Links
+In our case we want to start with Tailwind, so following the [Tailwind installation guide](https://tailwindcss.com/docs/installation#1-install-tailwind-via-npm) first we install the package from npm (using `yarn`).
 
-* [ember.js](https://emberjs.com/)
-* [ember-cli](https://ember-cli.com/)
-* Development Browser Extensions
-  * [ember inspector for chrome](https://chrome.google.com/webstore/detail/ember-inspector/bmdblncegkenkacieihfhpjfppoconhi)
-  * [ember inspector for firefox](https://addons.mozilla.org/en-US/firefox/addon/ember-inspector/)
+```
+yarn add tailwindcss --dev
+```
+
+### Adding directives
+
+Then add the directives to `styles/app.css`.
+
+```
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+### Including in the build pipeline
+
+The final step is to include Tailwind in the list of PostCSS plugins in `ember-cli-build.js`
+
+```js
+// ember-cli-build.js
+'use strict';
+
+const EmberApp = require('ember-cli/lib/broccoli/ember-app');
+
+module.exports = function(defaults) {
+  let app = new EmberApp(defaults, {
+    postcssOptions: {
+      compile: {
+        plugins: [
+          require('tailwindcss')
+        ]
+      }
+    }
+  });
+  return app.toTree();
+};
+```
+
+This is even [helpfully documented in the PostCSS installation guide](https://tailwindcss.com/docs/installation#ember-js).
+
+After updating `templates/application.hbs` to include some Tailwind classes it shows that it is working correctly.
+
+```hbs
+<section class="container mx-auto mt-4">
+  <h1 class="text-2xl text-red-500">Example title using Tailwind</h1>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+</section>
+
+{{outlet}}
+```
+
+You can see this basic working example in this commit.
