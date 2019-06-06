@@ -1,3 +1,5 @@
+/*global module*/
+
 module.exports = {
   prefix: '',
   important: false,
@@ -10,7 +12,7 @@ module.exports = {
       xl: '1280px',
     },
     colors: {
-      magenta: '#f0f',
+      magenta: '#F0F',
 
       transparent: 'transparent',
 

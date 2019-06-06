@@ -2,7 +2,7 @@
 
 ## Background
 
-An excellent Ember addon `ember-cli-tailwind` already exists which wraps Tailwind CSS and provides easy integration in an Ember application.
+An excellent [Ember addon `ember-cli-tailwind`](https://github.com/embermap/ember-cli-tailwind) already exists which wraps Tailwind CSS and provides easy integration in an Ember application.
 
 However, although Tailwind itself has [recently released v1.0 with some key differences and updates](https://tailwindcss.com/docs/upgrading-to-v1) the addon currently includes a specific pre v1.0 version of Tailwind.
 
@@ -20,6 +20,7 @@ I've written up in depth below each step of the process but if you just want to 
 
 ```
 ember new your-project --yarn
+cd your-project
 ```
 
 ### Install PostCSS and plugins
@@ -31,7 +32,14 @@ yarn add ember-cli-postcss tailwindcss postcss-import @fullhuman/postcss-purgecs
 ### Generate Tailwind configuration file
 
 ```
-npx tailwind init config/tailwind.js --full
+mkdir app/tailwind
+npx tailwind init app/tailwind/config.js --full
+```
+
+Add this to the top of the file removes the `no-undef` linting error
+
+```
+/*global module*/
 ```
 
 Note: [you probably don't want to add `--full`](https://tailwindcss.com/docs/configuration#creating-your-configuration-file) in a real project.
@@ -63,7 +71,7 @@ module.exports = function(defaults) {
       compile: {
         plugins: [
           require('postcss-import'),
-          require('tailwindcss')('./config/tailwind.js'),
+          require('tailwindcss')('./app/tailwind/config.js'),
           ...isProduction ? [purgeCSS] : []
         ]
       }
@@ -184,16 +192,25 @@ This is explained in detail in the [Tailwind Configuration guide](https://tailwi
 
 The first step is to generate a configuration file.
 
-For Ember, it makes sense to include this file in the `/config` directory and in this example we are going to include the full configuration (in reality, [you should start as minimal as possible](https://tailwindcss.com/docs/configuration#creating-your-configuration-file) but this is useful for this example).
+As we want the application to rebuild after changes to the configuration file instead of using the Ember `/config` directory instead we will create it in a `tailwind` directory in the `app` directory so it gets watched when changes are made automatically.
+
+In this example we are going to include the full configuration (whereas in reality, [you should start as minimal as possible](https://tailwindcss.com/docs/configuration#creating-your-configuration-file) — but this is useful for testing this example).
 
 ```
-npx tailwind init config/tailwind.js --full
+mkdir app/tailwind
+npx tailwind init app/tailwind/config.js --full
 ```
 
 Which should result in something like this
 
 ```
-✅ Created Tailwind config file: config/tailwind.js
+✅ Created Tailwind config file: app/tailwind/config.js
+```
+
+Add this to the top of the file removes the `no-undef` linting error
+
+```
+/*global module*/
 ```
 
 ### Updating path to configuration in build pipeline
@@ -211,7 +228,7 @@ module.exports = function(defaults) {
     postcssOptions: {
       compile: {
         plugins: [
-          require('tailwindcss')('./config/tailwind.js')
+          require('tailwindcss')('./app/tailwind/config.js')
         ]
       }
     }
@@ -254,7 +271,7 @@ module.exports = function(defaults) {
       compile: {
         plugins: [
           require('postcss-import'),
-          require('tailwindcss')('./config/tailwind.js')
+          require('tailwindcss')('./app/tailwind/config.js')
         ]
       }
     }
@@ -311,7 +328,7 @@ module.exports = function(defaults) {
       compile: {
         plugins: [
           require('postcss-import'),
-          require('tailwindcss')('./config/tailwind.js'),
+          require('tailwindcss')('./app/tailwind/config.js'),
           {
             module: require('@fullhuman/postcss-purgecss'),
             options: {
@@ -369,7 +386,7 @@ module.exports = function(defaults) {
       compile: {
         plugins: [
           require('postcss-import'),
-          require('tailwindcss')('./config/tailwind.js'),
+          require('tailwindcss')('./app/tailwind/config.js'),
           ...isProduction ? [purgeCSS] : []
         ]
       }
