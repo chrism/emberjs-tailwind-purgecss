@@ -38,7 +38,7 @@ npx tailwind init app/tailwind/config.js --full
 
 Add this to the top of the file removes the `no-undef` linting error
 
-```
+```js
 /*global module*/
 ```
 
@@ -85,7 +85,7 @@ module.exports = function(defaults) {
 
 Create `app/styles/components.css` and `app/styles/utilities.css` then update `app.css`
 
-```
+```css
 @import "tailwindcss/base";
 
 @import "tailwindcss/components";
@@ -139,7 +139,7 @@ yarn add tailwindcss --dev
 
 Then add the directives to `styles/app.css`.
 
-```
+```css
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -209,7 +209,7 @@ Which should result in something like this
 
 Add this to the top of the file removes the `no-undef` linting error
 
-```
+```js
 /*global module*/
 ```
 
@@ -288,7 +288,7 @@ For the `app.css` file some changes are needed to the way the tailwind files are
 
 This approach of switching from `@tailwind` directives to `@import` for `postcss-import` is explained in the [Tailwind documentation on using CSS](https://tailwindcss.com/docs/adding-new-utilities#using-css).
 
-```
+```css
 @import "tailwindcss/base";
 
 @import "tailwindcss/components";
