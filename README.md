@@ -25,20 +25,20 @@ cd your-project
 
 ### Install PostCSS and plugins
 
-```
+```bash
 yarn add ember-cli-postcss tailwindcss postcss-import @fullhuman/postcss-purgecss -D
 ```
 
 ### Generate Tailwind configuration file
 
-```
+```bash
 mkdir app/tailwind
 npx tailwind init app/tailwind/config.js --full
 ```
 
 Add this to the top of the file removes the `no-undef` linting error
 
-```
+```js
 /*global module*/
 ```
 
@@ -85,7 +85,7 @@ module.exports = function(defaults) {
 
 Create `app/styles/components.css` and `app/styles/utilities.css` then update `app.css`
 
-```
+```css
 @import "tailwindcss/base";
 
 @import "tailwindcss/components";
@@ -105,7 +105,7 @@ A detailed explanation of each step and why continues below
 
 Assuming you already have `yarn` and `ember-cli` installed.
 
-```
+```bash
 ember new emberjs-tailwind-purgecss --yarn
 ```
 
@@ -119,7 +119,7 @@ Luckily, a [PostCSS](https://postcss.org/) addon already exists for Ember, [Embe
 
 It can be installed with
 
-```
+```bash
 ember install ember-cli-postcss
 ```
 
@@ -131,7 +131,7 @@ On it's own this doesn't do much but allows PostCSS plugins to be included in th
 
 In our case we want to start with Tailwind, so following the [Tailwind installation guide](https://tailwindcss.com/docs/installation#1-install-tailwind-via-npm) first we install the package from npm (using `yarn`).
 
-```
+```bash
 yarn add tailwindcss --dev
 ```
 
@@ -139,7 +139,7 @@ yarn add tailwindcss --dev
 
 Then add the directives to `styles/app.css`.
 
-```
+```css
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -196,7 +196,7 @@ As we want the application to rebuild after changes to the configuration file in
 
 In this example we are going to include the full configuration (whereas in reality, [you should start as minimal as possible](https://tailwindcss.com/docs/configuration#creating-your-configuration-file) — but this is useful for testing this example).
 
-```
+```bash
 mkdir app/tailwind
 npx tailwind init app/tailwind/config.js --full
 ```
@@ -209,7 +209,7 @@ Which should result in something like this
 
 Add this to the top of the file removes the `no-undef` linting error
 
-```
+```js
 /*global module*/
 ```
 
@@ -251,7 +251,7 @@ While with our current solution it is possible to add them directly to the `app.
 
 To do that we need to now include `postcss-import` which is a plugin to inline `@import` rules content.
 
-```
+```bash
 yarn add postcss-import -D
 ```
 
@@ -288,7 +288,7 @@ For the `app.css` file some changes are needed to the way the tailwind files are
 
 This approach of switching from `@tailwind` directives to `@import` for `postcss-import` is explained in the [Tailwind documentation on using CSS](https://tailwindcss.com/docs/adding-new-utilities#using-css).
 
-```
+```css
 @import "tailwindcss/base";
 
 @import "tailwindcss/components";
@@ -310,7 +310,7 @@ To do this we can use another library called [PurgeCSS](https://www.purgecss.com
 
 ### Installing PurgeCSS
 
-```
+```bash
 yarn add @fullhuman/postcss-purgecss -D
 ```
 
