@@ -421,6 +421,82 @@ module.exports = function(defaults) {
 
 This final configuration now should match all standard Tailwind selectors and only run purgeCSS when building for production.
 
+## Using Tailwind with ember-cli-sass
+
+If you're using `ember-cli-sass` and looking to add Tailwind, it is possible to set up PostCSS along side ember-cli-sass. This setup is not ideal, but it can be useful if you want access to Tailwind without replacing ember-cli-sass with ember-cli-postcss.
+
+The key to this setup is that you don't use the `compile` part of `ember-cli-postcss` at all. Instead, ember-cli-sass "owns" the compile step, and PostCSS only uses `filter` to process the output of your Sass build.
+
+There are a few limitations to note here:
+- You are limited to `@tailwind` directives instead of `@import` since `ember-cli-sass` will process any `@import` statements before the css files are processed by PostCSS. You won't be able to use `postcss-import` at all, though Sass imports will continue to work (they just work differently than postcss-import).
+- Any additional CSS output files specified in the `outputPaths` hash in `ember-cli-build.js` will be processed by ember-cli-sass and will need to be .scss or .sass files. Since outputPaths also gets passed to the `compile` step of ember-cli-postcss we need to disable `compile` in the build config for PostCSS so that PostCSS doesn't error when it sees syntax it can't parse. It may be possible to configure PostCSS to parse scss but that is outside the scope of this example.
+- You can use Tailwind's custom utilities and components (using @apply) but those files will need to be `.scss` files and you'll need to use Sass `@import` to get them into your css.
+- You may want to consider using PurgeCSS comments to exclude your existing Sass-based CSS from the PurgeCSS step
+
+
+```js
+// ember-cli-build.js
+'use strict';
+
+const EmberApp = require('ember-cli/lib/broccoli/ember-app');
+const isProduction = EmberApp.env() === 'production';
+
+const purgeCSS = {
+  module: require('@fullhuman/postcss-purgecss'),
+  options: {
+    content: [
+      // add extra paths here for components/controllers which include tailwind classes
+      './app/index.html',
+      './app/templates/**/*.hbs'
+    ],
+    defaultExtractor: content => content.match(/[A-Za-z0-9-_:/]+/g) || []
+  }
+}
+
+module.exports = function(defaults) {
+  let app = new EmberApp(defaults, {
+    postcssOptions: {
+      compile: {
+        enabled: false
+      },
+      filter: {
+        plugins: [
+          require('tailwindcss')('./app/tailwind.config.js'),
+          ...isProduction ? [purgeCSS] : []
+        ]
+      }
+    }
+  });
+  return app.toTree();
+};
+```
+
+```css
+// app/styles
+// |___ app.scss
+// |___ partials
+        |___ ...
+// |___ tailwind
+//      |__ components.scss
+//      |__ utilites.scss
+
+@tailwind base
+
+/* purgecss start ignore */
+
+@import partials/first
+...
+@import partials/last
+
+@tailwind components
+@import tailwind/components
+
+/* purgecss end ignore */
+
+@tailwind utilities
+@import tailwind/utilities
+```
+
 ## What else?
 
 In [Ed Faulkner's example he included `join` for the paths](https://discuss.emberjs.com/t/postcss-import-problem-with-tailwindcss-v1-0/16595/10).
