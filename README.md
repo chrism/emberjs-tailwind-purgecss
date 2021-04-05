@@ -26,7 +26,7 @@ cd your-project
 ### Install PostCSS and plugins
 
 ```bash
-yarn add ember-cli-postcss tailwindcss postcss-import @fullhuman/postcss-purgecss -D
+yarn add ember-cli-postcss tailwindcss postcss-import @fullhuman/postcss-purgecss autoprefixer -D
 ```
 
 ### Generate Tailwind configuration file
