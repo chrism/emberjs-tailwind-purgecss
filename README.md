@@ -204,7 +204,7 @@ In this example we are going to include the full configuration (whereas in reali
 
 ```bash
 mkdir app/tailwind
-npx tailwind init app/tailwind.config.js --full
+npx tailwind init app/tailwind/config.js --full
 ```
 
 Which should result in something like this
