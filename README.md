@@ -33,7 +33,7 @@ yarn add ember-cli-postcss tailwindcss postcss-import @fullhuman/postcss-purgecs
 
 ```bash
 mkdir app/tailwind
-npx tailwind init app/tailwind.config.js --full
+npx tailwind init app/tailwind/tailwind.config.js --full
 ```
 
 Add this to the top of the file removes the `no-undef` linting error
@@ -77,7 +77,7 @@ module.exports = function(defaults) {
               path: ['node_modules']
             }
           },
-          require('tailwindcss')('./app/tailwind.config.js'),
+          require('tailwindcss')('./app/tailwind/tailwind.config.js'),
           ...isProduction ? [purgeCSS] : []
         ]
       }
@@ -204,13 +204,13 @@ In this example we are going to include the full configuration (whereas in reali
 
 ```bash
 mkdir app/tailwind
-npx tailwind init app/tailwind.config.js --full
+npx tailwind init app/tailwind/tailwind.config.js --full
 ```
 
 Which should result in something like this
 
 ```
-✅ Created Tailwind config file: app/tailwind.config.js
+✅ Created Tailwind config file: app/tailwind/tailwind.config.js
 ```
 
 Add this to the top of the file removes the `no-undef` linting error
@@ -234,7 +234,7 @@ module.exports = function(defaults) {
     postcssOptions: {
       compile: {
         plugins: [
-          require('tailwindcss')('./app/tailwind.config.js')
+          require('tailwindcss')('./app/tailwind/tailwind.config.js')
         ]
       }
     }
@@ -282,7 +282,7 @@ module.exports = function(defaults) {
               path: ['node_modules']
             }
           },
-          require('tailwindcss')('./app/tailwind.config.js')
+          require('tailwindcss')('./app/tailwind/tailwind.config.js')
         ]
       }
     }
@@ -344,7 +344,7 @@ module.exports = function(defaults) {
               path: ['node_modules']
             }
           },
-          require('tailwindcss')('./app/tailwind.config.js'),
+          require('tailwindcss')('./app/tailwind/tailwind.config.js'),
           {
             module: require('@fullhuman/postcss-purgecss'),
             options: {
@@ -409,7 +409,7 @@ module.exports = function(defaults) {
               path: ['node_modules']
             }
           },
-          require('tailwindcss')('./app/tailwind.config.js'),
+          require('tailwindcss')('./app/tailwind/tailwind.config.js'),
           ...isProduction ? [purgeCSS] : []
         ]
       }
